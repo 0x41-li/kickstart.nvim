@@ -7,6 +7,17 @@ vim.g.maplocalleader = ' '
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
+-- Vim move config
+vim.g.move_key_modifier = 'C'
+
+vim.g.move_key_modifier = 'C' -- Set the modifier key to Control
+
+-- Map the keybindings
+vim.api.nvim_set_keymap('n', '<C-j>', '<Plug>MoveLineDown', {})
+vim.api.nvim_set_keymap('n', '<C-k>', '<Plug>MoveLineUp', {})
+vim.api.nvim_set_keymap('x', '<C-j>', '<Plug>MoveBlockDown', {})
+vim.api.nvim_set_keymap('x', '<C-k>', '<Plug>MoveBlockUp', {})
+
 -- [[ Setting options ]]
 -- See `:help vim.opt`
 -- NOTE: You can change these options as you wish!
@@ -68,8 +79,15 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 50
 
--- Use
+-- Use the OS clipboard by default
 vim.opt.switchbuf = 'useopen'
+
+-- Number of spaces that a <Tab> in the file counts for
+-- Number of spaces to use for each step of (auto)indent
+-- Use spaces instead of tabs
+vim.opt.tabstop = 2
+vim.opt.shiftwidth = 2
+vim.opt.expandtab = true
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
@@ -636,6 +654,7 @@ require('lazy').setup({
         ['markdown.mdx'] = { 'prettier' },
         ['graphql'] = { 'prettier' },
         ['handlebars'] = { 'prettier' },
+        ['php'] = { 'tlint', 'prettier' },
       },
     },
   },
@@ -816,6 +835,7 @@ require('lazy').setup({
       ensure_installed = { 'bash', 'c', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc', 'blade' },
       -- Autoinstall languages that are not installed
       auto_install = true,
+
       highlight = {
         enable = true,
       },
@@ -838,28 +858,10 @@ require('lazy').setup({
     end,
   },
 
-  -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
-  -- init.lua. If you want these files, they are in the repository, so you can just download them and
-  -- place them in the correct locations.
-
-  -- NOTE: Next step on your Neovim journey: Add/Configure additional plugins for Kickstart
-  --
-  --  Here are some example plugins that I've included in the Kickstart repository.
-  --  Uncomment any of the lines below to enable them (you will need to restart nvim).
-  --
-  -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
-
-  -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
-  --    This is the easiest way to modularize your config.
-  --
-  --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
-  -- { import = 'custom.plugins' },
+  -- lazy.nvim configuration
+  {
+    'matze/vim-move',
+  },
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
@@ -884,3 +886,21 @@ require('lazy').setup({
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+--
+
+-- Define an augroup to manage the autocmds
+vim.api.nvim_create_augroup('remember_folds', { clear = true })
+
+-- Save folds when leaving a buffer
+vim.api.nvim_create_autocmd('BufWinLeave', {
+  group = 'remember_folds',
+  pattern = '*.*',
+  command = 'mkview',
+})
+
+-- Load folds when entering a buffer
+vim.api.nvim_create_autocmd('BufWinEnter', {
+  group = 'remember_folds',
+  pattern = '*.*',
+  command = 'silent! loadview',
+})
